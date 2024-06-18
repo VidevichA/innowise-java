@@ -1,0 +1,55 @@
+services:
+  order:
+    image: order
+    container_name: order
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8083:8083'
+    depends_on:
+      - order_db
+    environment:
+      - APP_PROFILE=prod
+      - ORDEr_SERVICE_PORT=8083
+      - CONFIG_URI=http://config:8888
+    networks:
+      - online-shop-network
+    profiles: [prod]
+  order_db:
+    container_name: order_db
+    ports:
+      - '5435:5432'
+    image: postgres:15
+    volumes:
+      - order_db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+    networks:
+      - online-shop-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_order
+    depends_on:
+      - order_db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_order:/var/lib/pgadmin
+    ports:
+      - '5053:80'
+    networks:
+      - online-shop-network
+
+volumes:
+  order_db:
+  pgadmin_order:
+
+networks:
+  online-shop-network:
+    external: true

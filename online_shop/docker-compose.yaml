@@ -1,0 +1,19 @@
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit disk_free_limit 2147483648
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - online-shop-network
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+
+networks:
+  online-shop-network:
+    external: true
