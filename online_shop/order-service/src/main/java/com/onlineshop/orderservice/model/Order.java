@@ -26,9 +26,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "`order`")
 public class Order {
 
