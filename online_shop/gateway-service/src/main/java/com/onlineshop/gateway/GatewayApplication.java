@@ -1,5 +1,7 @@
 package com.onlineshop.gateway;
 
+import java.net.InetSocketAddress;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -15,10 +17,16 @@ public class GatewayApplication {
         SpringApplication.run(GatewayApplication.class, args);
     }
 
-    @SuppressWarnings("null")
     @Bean
     public KeyResolver userKeyResolver() {
-        return exchange -> Mono.just(exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
+        return exchange -> {
+            InetSocketAddress remoteAddress = exchange.getRequest().getRemoteAddress();
+            if (remoteAddress != null) {
+                return Mono.just(remoteAddress.getAddress().getHostAddress());
+            } else {
+                return Mono.empty();
+            }
+        };
     }
 
 }
