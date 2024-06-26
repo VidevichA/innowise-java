@@ -32,7 +32,7 @@ public class MQListener {
             OrderRequest orderRequest = objectMapper.readValue(message, OrderRequest.class);
             inventoryService.handleOrderCancelation(orderRequest);
         } catch (Exception e) {
-            log.info("Error: {}", e);
+            log.error("Error: {}", e);
         }
     }
 }
