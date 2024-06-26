@@ -9,15 +9,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlineshop.inventoryservice.dto.OrderRequest;
 import com.onlineshop.inventoryservice.service.InventoryService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class MQListener {
     static final String queueName = "cancel_order_queue";
-    private InventoryService inventoryService;
+    private final InventoryService inventoryService;
     private final ObjectMapper objectMapper;
 
     @Bean
