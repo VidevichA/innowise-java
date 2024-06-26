@@ -1,7 +1,5 @@
 package com.onlineshop.inventoryservice.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.annotation.Bean;
@@ -12,9 +10,11 @@ import com.onlineshop.inventoryservice.dto.OrderRequest;
 import com.onlineshop.inventoryservice.service.InventoryService;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class MQListener {
     static final String queueName = "cancel_order_queue";
     private InventoryService inventoryService;
@@ -27,7 +27,6 @@ public class MQListener {
 
     @RabbitListener(queues = queueName)
     public void handleMessage(String message) {
-        Logger log = LoggerFactory.getLogger(MQListener.class);
         try {
             OrderRequest orderRequest = objectMapper.readValue(message, OrderRequest.class);
             inventoryService.handleOrderCancelation(orderRequest);
