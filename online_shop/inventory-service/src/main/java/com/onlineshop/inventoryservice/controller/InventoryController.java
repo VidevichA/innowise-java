@@ -47,7 +47,7 @@ public class InventoryController {
         inventoryService.updateInventoryQuantity(id, quantity);
     }
 
-    @PostMapping("/handle-order")
+    @PostMapping("/order-processing")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<String> substractProductsQuantity(@NotNull @RequestBody Long orderId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
