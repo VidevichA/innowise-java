@@ -1,6 +1,8 @@
 package com.onlineshop.productservice.service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -18,9 +20,9 @@ public class ProductService {
 
     private ProductRepository productRepository;
 
-    public List<ProductResponse> getAllProducts() {
+    public Set<ProductResponse> getAllProducts() {
         List<Product> products = (List<Product>) productRepository.findAll();
-        return products.stream().map(this::convertToResponse).toList();
+        return products.stream().map(this::convertToResponse).collect(Collectors.toSet());
     }
 
     public ProductResponse getProductById(Long id) {

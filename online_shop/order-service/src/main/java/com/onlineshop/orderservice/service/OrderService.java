@@ -3,6 +3,8 @@ package com.onlineshop.orderservice.service;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -63,7 +65,7 @@ public class OrderService {
         }
     }
 
-    public List<OrderResponse> getAllOrders() {
+    public Set<OrderResponse> getAllOrders() {
         return ((Collection<Order>) orderRepository.findAll()).stream().map(
                 order -> {
                     OrderResponse response = new OrderResponse();
@@ -73,7 +75,8 @@ public class OrderService {
                     response.setOrderItems(order.getOrderItems());
                     response.setTotalPrice(order.getTotalPrice());
                     return response;
-                }).toList();
+                })
+                .collect(Collectors.toSet());
     }
 
     private ResponseEntity<String> sendReservationRequest(Order order, Jwt jwt) {
@@ -89,7 +92,7 @@ public class OrderService {
         return response;
     }
 
-    public List<OrderResponse> getOrdersByUserId(String userId) {
+    public Set<OrderResponse> getOrdersByUserId(String userId) {
         return orderRepository.findByUserId(userId).stream().map(
                 order -> {
                     OrderResponse response = new OrderResponse();
@@ -99,7 +102,8 @@ public class OrderService {
                     response.setOrderItems(order.getOrderItems());
                     response.setTotalPrice(order.getTotalPrice());
                     return response;
-                }).toList();
+                })
+                .collect(Collectors.toSet());
     }
 
     public OrderResponse getOrderById(Long id, String userId) {

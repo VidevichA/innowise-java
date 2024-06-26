@@ -1,6 +1,7 @@
 package com.onlineshop.inventoryservice.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,13 +59,13 @@ public class InventoryController {
 
     @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public List<InventoryResponse> getAllInventories() {
+    public Set<InventoryResponse> getAllInventories() {
         return inventoryService.getAllInventories();
     }
 
     @GetMapping("/productIds")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public List<InventoryResponse> getInventoriesByProductIds(@RequestParam("productIds") List<Long> productIds) {
+    public Set<InventoryResponse> getInventoriesByProductIds(@RequestParam("productIds") List<Long> productIds) {
         return inventoryService.getInventoriesByProductIds(productIds);
     }
 

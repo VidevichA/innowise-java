@@ -1,6 +1,6 @@
 package com.onlineshop.productservice.controller;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public List<ProductResponse> getProducts() {
+    public Set<ProductResponse> getProducts() {
         return productService.getAllProducts();
     }
 

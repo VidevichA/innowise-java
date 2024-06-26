@@ -1,6 +1,6 @@
 package com.onlineshop.orderservice.controller;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -47,7 +47,7 @@ public class OrderController {
 
     @GetMapping("/user/orders")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public List<OrderResponse> getOrdersByUserId() {
+    public Set<OrderResponse> getOrdersByUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
         return orderService.getOrdersByUserId(jwt.getClaimAsString("sub"));
@@ -79,7 +79,7 @@ public class OrderController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<OrderResponse> getAllOrders() {
+    public Set<OrderResponse> getAllOrders() {
         return orderService.getAllOrders();
     }
 

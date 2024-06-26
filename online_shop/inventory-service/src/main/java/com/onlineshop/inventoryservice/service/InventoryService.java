@@ -1,6 +1,8 @@
 package com.onlineshop.inventoryservice.service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,28 +67,29 @@ public class InventoryService {
         }
     }
 
-    public List<InventoryResponse> getAllInventories() {
+    public Set<InventoryResponse> getAllInventories() {
         return StreamSupport.stream(inventoryRepository.findAll().spliterator(), false)
                 .map(inventory -> InventoryResponse.builder()
                         .id(inventory.getId())
                         .productId(inventory.getProductId())
                         .quantity(inventory.getQuantity())
                         .build())
-                .toList();
+                .collect(Collectors.toSet());
+
     }
 
     public void deleteInventory(Long inventoryId) {
         inventoryRepository.deleteById(inventoryId);
     }
 
-    public List<InventoryResponse> getInventoriesByProductIds(List<Long> productIds) {
+    public Set<InventoryResponse> getInventoriesByProductIds(List<Long> productIds) {
         return inventoryRepository.findByProductIdIn(productIds).stream()
                 .map(inventory -> InventoryResponse.builder()
                         .id(inventory.getId())
                         .productId(inventory.getProductId())
                         .quantity(inventory.getQuantity())
                         .build())
-                .toList();
+                .collect(Collectors.toSet());
     }
 
     public void updateInventoryQuantity(Long inventoryId, Integer quantity) {
