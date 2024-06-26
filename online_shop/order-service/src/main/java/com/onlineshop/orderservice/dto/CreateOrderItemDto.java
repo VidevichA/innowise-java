@@ -3,9 +3,15 @@ package com.onlineshop.orderservice.dto;
 import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateOrderItemDto {
 
     @NotNull(message = "ProductId cannot be null")
