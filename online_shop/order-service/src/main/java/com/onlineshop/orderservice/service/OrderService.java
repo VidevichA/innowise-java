@@ -93,16 +93,19 @@ public class OrderService {
     }
 
     public Set<OrderResponse> getOrdersByUserId(String userId) {
-        return orderRepository.findByUserId(userId).stream().map(
-                order -> {
-                    OrderResponse response = new OrderResponse();
-                    response.setId(order.getId());
-                    response.setUserId(order.getUserId());
-                    response.setStatus(order.getStatus());
-                    response.setOrderItems(order.getOrderItems());
-                    response.setTotalPrice(order.getTotalPrice());
-                    return response;
-                })
+        return orderRepository.findByUserId(userId).stream()
+                .map(nullableOrder -> nullableOrder.orElse(null))
+                .filter(order -> order != null)
+                .map(
+                        order -> {
+                            OrderResponse response = new OrderResponse();
+                            response.setId(order.getId());
+                            response.setUserId(order.getUserId());
+                            response.setStatus(order.getStatus());
+                            response.setOrderItems(order.getOrderItems());
+                            response.setTotalPrice(order.getTotalPrice());
+                            return response;
+                        })
                 .collect(Collectors.toSet());
     }
 

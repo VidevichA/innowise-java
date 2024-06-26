@@ -53,11 +53,10 @@ public class InventoryService {
         for (JsonNode itemNode : orderItemsNode) {
             Long productId = itemNode.get("productId").asLong();
             Integer quantity = itemNode.get("quantity").asInt();
-            Inventory inventory = inventoryRepository.findByProductId(productId);
-            if (inventory == null) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND,
-                        "No inventory found for productId: " + productId);
-            }
+
+            Inventory inventory = inventoryRepository.findByProductId(productId).orElseThrow(
+                    () -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
+                            "No inventory found for productId: " + productId));
             if (inventory.getQuantity() - quantity < 0) {
                 throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
                         "Not enough inventory for productId: " + productId);
@@ -84,6 +83,8 @@ public class InventoryService {
 
     public Set<InventoryResponse> getInventoriesByProductIds(List<Long> productIds) {
         return inventoryRepository.findByProductIdIn(productIds).stream()
+                .map(optionalInventory -> optionalInventory.orElse(null))
+                .filter(inventory -> inventory != null)
                 .map(inventory -> InventoryResponse.builder()
                         .id(inventory.getId())
                         .productId(inventory.getProductId())
@@ -125,9 +126,12 @@ public class InventoryService {
     @Transactional
     public void handleOrderCancelation(OrderRequest orderRequest) {
         for (OrderItemRequest orderItemRequest : orderRequest.getOrderItems()) {
-            Inventory inventory = inventoryRepository.findByProductId(orderItemRequest.getProductId());
+            Inventory inventory = inventoryRepository.findByProductId(orderItemRequest.getProductId())
+                    .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
+                            "No inventory found for productId: " + orderItemRequest.getProductId()));
             inventory.setQuantity(inventory.getQuantity() + orderItemRequest.getQuantity());
             inventoryRepository.save(inventory);
+
         }
     }
 }
