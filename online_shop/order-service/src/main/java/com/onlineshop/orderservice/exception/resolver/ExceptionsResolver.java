@@ -1,4 +1,4 @@
-package com.onlineshop.orderservice.resolver;
+package com.onlineshop.orderservice.exception.resolver;
 
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
