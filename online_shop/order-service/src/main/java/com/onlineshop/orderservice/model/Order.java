@@ -41,6 +41,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private OrderStatus status = OrderStatus.PROCESSING;
 
     @Column(nullable = false)
@@ -48,5 +49,6 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @Fetch(FetchMode.JOIN)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 }

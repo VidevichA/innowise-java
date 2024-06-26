@@ -15,7 +15,7 @@ public class ExceptionsResolver {
     public ResponseEntity<ErrorResponse> handleHttpClientErrorException(HttpClientErrorException ex) {
         Logger logger = org.slf4j.LoggerFactory.getLogger(ExceptionsResolver.class);
         logger.error(ex.getResponseBodyAsString());
-        ErrorResponse errorResponse = new ErrorResponse(ex.getResponseBodyAsString());
+        ErrorResponse errorResponse = new ErrorResponse(ex.getStatusText());
         return new ResponseEntity<>(errorResponse, ex.getStatusCode());
     }
 

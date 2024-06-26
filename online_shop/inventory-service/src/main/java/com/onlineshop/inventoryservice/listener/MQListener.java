@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 public class MQListener {
     static final String queueName = "cancel_order_queue";
     private final InventoryService inventoryService;
-    private final ObjectMapper objectMapper;
 
     @Bean
     Queue myQueue() {
@@ -27,11 +26,12 @@ public class MQListener {
 
     @RabbitListener(queues = queueName)
     public void handleMessage(String message) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
             OrderRequest orderRequest = objectMapper.readValue(message, OrderRequest.class);
             inventoryService.handleOrderCancelation(orderRequest);
         } catch (Exception e) {
-            log.error("Error: {}", e);
+            log.error("Error: + " + e.getMessage());
         }
     }
 }

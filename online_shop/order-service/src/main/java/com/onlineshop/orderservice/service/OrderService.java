@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.onlineshop.orderservice.dto.CreateOrderRequest;
+import com.onlineshop.orderservice.dto.OrderItemDto;
+import com.onlineshop.orderservice.dto.OrderRequest;
 import com.onlineshop.orderservice.dto.OrderResponse;
 import com.onlineshop.orderservice.model.Order;
 import com.onlineshop.orderservice.model.OrderItem;
@@ -38,7 +41,11 @@ public class OrderService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public void createOrder(CreateOrderRequest createOrderDto, Jwt jwt) {
+    private RabbitTemplate rabbitTemplate;
+    static final String exchangeName = "exchange";
+    static final String routingKey = "cancel_order_key";
+
+    public void createOrder(OrderRequest createOrderDto, Jwt jwt) {
         Order order = new Order();
         String userId = jwt.getClaimAsString("sub");
         order.setUserId(userId);
@@ -143,6 +150,22 @@ public class OrderService {
         }
         order.setStatus(status);
         orderRepository.save(order);
+    }
+
+    public void cancelOrder(Long id, String jwt) {
+        var order = getOrderById(id, jwt);
+        if (order.getStatus().equals(OrderStatus.CANCELLED)) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Order already cancelled");
+        }
+        updateOrderStatus(id, OrderStatus.CANCELLED, jwt);
+        OrderRequest orderRequest = OrderRequest.builder().orderItems(
+                order.getOrderItems().stream()
+                        .map(orderItem -> OrderItemDto.builder().productId(orderItem.getProductId())
+                                .quantity(orderItem.getQuantity()).price(orderItem.getPrice()).build())
+                        .toList())
+                .build();
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.convertAndSend(exchangeName, routingKey, orderRequest);
     }
 
 }

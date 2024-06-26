@@ -132,7 +132,6 @@ public class InventoryService {
                             "No inventory found for productId: " + orderItemRequest.getProductId()));
             inventory.setQuantity(inventory.getQuantity() + orderItemRequest.getQuantity());
             inventoryRepository.save(inventory);
-
         }
     }
 }

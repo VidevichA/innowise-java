@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderItemDto {
+public class OrderItemDto {
 
     @NotNull(message = "ProductId cannot be null")
     private Long productId;
