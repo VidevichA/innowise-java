@@ -41,7 +41,8 @@ public class InventoryService {
 
     public void addNewProductToInventory(CreateInventoryRequest createInventoryRequest) {
         if (inventoryRepository.findByProductId(createInventoryRequest.getProductId()) != null) {
-            return;
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                    "Inventory for productId: " + createInventoryRequest.getProductId() + " already exists");
         }
         Inventory inventory = Inventory.builder().productId(createInventoryRequest.getProductId())
                 .quantity(createInventoryRequest.getQuantity()).build();
