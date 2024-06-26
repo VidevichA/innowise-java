@@ -42,9 +42,9 @@ public class InventoryController {
         inventoryService.addNewProductToInventory(createInventoryRequest);
     }
 
-    @PutMapping("/{id}/{quantity}")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateInventoryQuantity(@PathVariable("id") Long id, @PathVariable("quantity") Integer quantity) {
+    public void updateInventoryQuantity(@PathVariable("id") Long id, @RequestParam("quantity") Integer quantity) {
         inventoryService.updateInventoryQuantity(id, quantity);
     }
 
