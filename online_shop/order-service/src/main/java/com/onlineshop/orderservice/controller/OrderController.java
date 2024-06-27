@@ -5,8 +5,6 @@ import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,35 +32,26 @@ public class OrderController {
     @PostMapping()
     @ResponseStatus(code = HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public void createOrder(@Valid @RequestBody OrderRequest createOrderDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        orderService.createOrder(createOrderDto, jwt);
+    public void createOrder(@Valid @RequestBody OrderRequest createOrderDto, Authentication auth) {
+        orderService.createOrder(createOrderDto, auth.getName());
     }
 
     @GetMapping("/user/orders")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public Set<OrderResponse> getOrdersByUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        return orderService.getOrdersByUserId(jwt.getClaimAsString("sub"));
+    public Set<OrderResponse> getOrdersByUserId(Authentication auth) {
+        return orderService.getOrdersByUserId(auth.getName());
     }
 
     @PostMapping("/{id}/complete")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public void completeOrder(@PathVariable("id") Long orderId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        // TODO payment check logic
-        orderService.updateOrderStatus(orderId, OrderStatus.COMPLETED, jwt.getClaimAsString("sub"));
+    public void completeOrder(@PathVariable("id") Long orderId, Authentication auth) {
+        orderService.updateOrderStatus(orderId, OrderStatus.COMPLETED, auth.getName());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public OrderResponse getOrderById(@PathVariable("id") Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        return orderService.getOrderById(id, jwt.getClaimAsString("sub"));
+    public OrderResponse getOrderById(@PathVariable("id") Long id, Authentication auth) {
+        return orderService.getOrderById(id, auth.getName());
     }
 
     @DeleteMapping("/{id}")
@@ -80,10 +69,8 @@ public class OrderController {
 
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public void cancelOrder(@PathVariable("id") Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        orderService.cancelOrder(id, jwt.getClaimAsString("sub"));
+    public void cancelOrder(@PathVariable("id") Long id, Authentication auth) {
+        orderService.cancelOrder(id, auth.getName());
     }
 
 }

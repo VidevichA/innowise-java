@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequest {
+public class OrderDto {
 
     @NotNull(message = "OrderItems cannot be null")
     @Valid
-    private List<OrderItemRequest> orderItems;
+    private List<OrderItemDto> orderItems;
 }

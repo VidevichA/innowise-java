@@ -6,9 +6,6 @@ import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.onlineshop.inventoryservice.dto.CreateInventoryRequest;
 import com.onlineshop.inventoryservice.dto.InventoryResponse;
+import com.onlineshop.inventoryservice.dto.OrderIdRequest;
 import com.onlineshop.inventoryservice.service.InventoryService;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -49,11 +46,8 @@ public class InventoryController {
     }
 
     @PostMapping("/order-processing")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<String> substractProductsQuantity(@NotNull @RequestBody Long orderId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        inventoryService.substractProductsQuantity(orderId, jwt);
+    public ResponseEntity<String> substractProductsQuantity(@Valid @RequestBody OrderIdRequest orderId) {
+        inventoryService.substractProductsQuantity(orderId.getOrderId());
         return ResponseEntity.ok().build();
     }
 

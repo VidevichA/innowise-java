@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlineshop.inventoryservice.dto.OrderRequest;
+import com.onlineshop.inventoryservice.dto.OrderDto;
 import com.onlineshop.inventoryservice.service.InventoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class MQListener {
     public void handleMessage(String message) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            OrderRequest orderRequest = objectMapper.readValue(message, OrderRequest.class);
+            OrderDto orderRequest = objectMapper.readValue(message, OrderDto.class);
             inventoryService.handleOrderCancelation(orderRequest);
         } catch (Exception e) {
             log.error("Error: + " + e.getMessage());

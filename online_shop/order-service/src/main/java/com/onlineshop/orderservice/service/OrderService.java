@@ -8,18 +8,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
+import com.onlineshop.orderservice.client.InventoryServiceClient;
 import com.onlineshop.orderservice.dto.OrderItemDto;
 import com.onlineshop.orderservice.dto.OrderRequest;
 import com.onlineshop.orderservice.dto.OrderResponse;
@@ -38,16 +32,14 @@ public class OrderService {
 
     private OrderRepository orderRepository;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private InventoryServiceClient inventoryServiceClient;
 
     private RabbitTemplate rabbitTemplate;
     static final String exchangeName = "exchange";
     static final String routingKey = "cancel_order_key";
 
-    public void createOrder(OrderRequest createOrderDto, Jwt jwt) {
+    public void createOrder(OrderRequest createOrderDto, String userId) {
         Order order = new Order();
-        String userId = jwt.getClaimAsString("sub");
         order.setUserId(userId);
 
         List<OrderItem> orderItems = createOrderDto.getOrderItems().stream().map(orderItemDto -> {
@@ -64,7 +56,7 @@ public class OrderService {
                 orderItems.stream().map(orderItem -> orderItem.getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add));
         var savedOrder = orderRepository.save(order);
         try {
-            sendReservationRequest(savedOrder, jwt);
+            sendReservationRequest(savedOrder);
         } catch (Exception e) {
             log.info("Reservation request failed");
             orderRepository.deleteById(savedOrder.getId());
@@ -86,16 +78,8 @@ public class OrderService {
                 .collect(Collectors.toSet());
     }
 
-    private ResponseEntity<String> sendReservationRequest(Order order, Jwt jwt) {
-        String url = "http://INVENTORY/api/v1/inventory/handle-order";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-        headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        headers.set("Authorization", "Bearer " + jwt.getTokenValue());
-
-        HttpEntity<Long> entity = new HttpEntity<>(order.getId(), headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+    private ResponseEntity<String> sendReservationRequest(Order order) {
+        var response = inventoryServiceClient.substractProductsQuantity(order.getId());
         return response;
     }
 
