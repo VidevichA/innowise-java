@@ -1,0 +1,17 @@
+services:
+  config:
+    image: config
+    container_name: config
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8888:8888'
+    environment:
+      - RABBITMQ_SERVICE_SERVICE_HOST=rabbitmq
+    networks:
+      - online-shop-network
+
+networks:
+  online-shop-network:
+    external: true

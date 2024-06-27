@@ -1,0 +1,56 @@
+services:
+  product:
+    image: product
+    container_name: product
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8082:8082'
+    depends_on:
+      - product_db
+    environment:
+      - APP_PROFILE=prod
+      - PRODUCT_SERVICE_PORT=8082
+      - CONFIG_URI=http://config:8888
+    networks:
+      - online-shop-network
+    profiles: [prod]
+
+  product_db:
+    image: postgres:15
+    container_name: product_db
+    volumes:
+      - product_db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+    ports:
+      - '5433:5432'
+    networks:
+      - online-shop-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_product
+    depends_on:
+      - product_db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_product:/var/lib/pgadmin
+    ports:
+      - '5051:80'
+    networks:
+      - online-shop-network
+
+networks:
+  online-shop-network:
+    external: true
+
+volumes:
+  product_db:
+  pgadmin_product:

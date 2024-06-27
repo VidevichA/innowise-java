@@ -1,0 +1,15 @@
+server:
+  port: ${ORDER_SERVICE_PORT:8083}
+spring:
+  application:
+    name: order
+  config:
+    import: 'optional:configserver:'
+  cloud:
+    config:
+      enabled: true
+      allow-override: true
+      uri: ${CONFIG_URI:http://localhost:8888/}
+      name: order
+      profile: ${APP_PROFILE:dev}
+      fail-fast: true

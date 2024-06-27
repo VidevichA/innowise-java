@@ -1,0 +1,33 @@
+services:
+  gateway:
+    container_name: gateway
+    image: gateway
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_PROFILE=prod
+      - CONFIG_URI=http://config:8888
+      - GATEWAY_SERVICE_PORT=8070
+    ports:
+      - '8070:8070'
+    networks:
+      - online-shop-network
+    profiles: [prod]
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./data:/data
+    networks:
+      - online-shop-network
+
+networks:
+  online-shop-network:
+    external: true

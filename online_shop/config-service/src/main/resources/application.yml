@@ -1,0 +1,23 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  rabbitmq:
+    addresses: ${RABBITMQ_SERVICE_SERVICE_HOST:localhost}
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/VidevichA/configs.git
+          default-label: master
+          clone-on-start: true
+          skip-ssl-validation: true
+          search-paths: '{application}'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
