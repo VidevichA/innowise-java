@@ -22,23 +22,21 @@ import com.onlineshop.orderservice.model.OrderItem;
 import com.onlineshop.orderservice.model.OrderStatus;
 import com.onlineshop.orderservice.repository.OrderRepository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class OrderService {
 
-    private OrderRepository orderRepository;
-
-    private InventoryServiceClient inventoryServiceClient;
-
-    private RabbitTemplate rabbitTemplate;
+    private final OrderRepository orderRepository;
+    private final InventoryServiceClient inventoryServiceClient;
+    private final RabbitTemplate rabbitTemplate;
     static final String exchangeName = "exchange";
     static final String routingKey = "cancel_order_key";
 
-    public void createOrder(OrderRequest createOrderDto, String userId) {
+    public OrderResponse createOrder(OrderRequest createOrderDto, String userId) {
         Order order = new Order();
         order.setUserId(userId);
 
@@ -57,11 +55,22 @@ public class OrderService {
         var savedOrder = orderRepository.save(order);
         try {
             sendReservationRequest(savedOrder);
+            return convertToResponse(savedOrder);
         } catch (Exception e) {
-            log.info("Reservation request failed");
+            log.error("Reservation request failed");
             orderRepository.deleteById(savedOrder.getId());
             throw e;
         }
+    }
+
+    private OrderResponse convertToResponse(Order order) {
+        return OrderResponse.builder()
+                .id(order.getId())
+                .userId(order.getUserId())
+                .status(order.getStatus())
+                .orderItems(order.getOrderItems())
+                .totalPrice(order.getTotalPrice())
+                .build();
     }
 
     public Set<OrderResponse> getAllOrders() {
@@ -78,7 +87,7 @@ public class OrderService {
                 .collect(Collectors.toSet());
     }
 
-    private ResponseEntity<String> sendReservationRequest(Order order) {
+    private ResponseEntity<?> sendReservationRequest(Order order) {
         var response = inventoryServiceClient.substractProductsQuantity(order.getId());
         return response;
     }

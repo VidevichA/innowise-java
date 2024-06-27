@@ -18,17 +18,17 @@ import com.onlineshop.inventoryservice.model.Inventory;
 import com.onlineshop.inventoryservice.repository.InventoryRepository;
 
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class InventoryService {
 
-    private InventoryRepository inventoryRepository;
+    private final InventoryRepository inventoryRepository;
 
-    private OrderServiceClient orderServiceClient;
+    private final OrderServiceClient orderServiceClient;
 
-    public void addNewProductToInventory(CreateInventoryRequest createInventoryRequest) {
+    public InventoryResponse addNewProductToInventory(CreateInventoryRequest createInventoryRequest) {
         if (inventoryRepository.findByProductId(createInventoryRequest.getProductId()) != null) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
                     "Inventory for productId: " + createInventoryRequest.getProductId() + " already exists");
@@ -36,6 +36,8 @@ public class InventoryService {
         Inventory inventory = Inventory.builder().productId(createInventoryRequest.getProductId())
                 .quantity(createInventoryRequest.getQuantity()).build();
         inventoryRepository.save(inventory);
+        return InventoryResponse.builder().id(inventory.getId()).productId(inventory.getProductId())
+                .quantity(inventory.getQuantity()).build();
     }
 
     @Transactional

@@ -1,4 +1,4 @@
-package com.onlineshop.orderservice.exception.resolver;
+package com.onlineshop.productservice.exception.resolver;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

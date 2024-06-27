@@ -3,6 +3,7 @@ package com.onlineshop.orderservice.controller;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.onlineshop.orderservice.dto.OrderRequest;
@@ -20,57 +20,63 @@ import com.onlineshop.orderservice.model.OrderStatus;
 import com.onlineshop.orderservice.service.OrderService;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/order")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OrderController {
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     @PostMapping()
-    @ResponseStatus(code = HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public void createOrder(@Valid @RequestBody OrderRequest createOrderDto, Authentication auth) {
-        orderService.createOrder(createOrderDto, auth.getName());
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest createOrderDto,
+            Authentication auth) {
+        OrderResponse order = orderService.createOrder(createOrderDto, auth.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @GetMapping("/user/orders")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public Set<OrderResponse> getOrdersByUserId(Authentication auth) {
-        return orderService.getOrdersByUserId(auth.getName());
+    public ResponseEntity<Set<OrderResponse>> getOrdersByUserId(Authentication auth) {
+        var orders = orderService.getOrdersByUserId(auth.getName());
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping("/{id}/complete")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public void completeOrder(@PathVariable("id") Long orderId, Authentication auth) {
+    public ResponseEntity<?> completeOrder(@PathVariable("id") Long orderId, Authentication auth) {
         orderService.updateOrderStatus(orderId, OrderStatus.COMPLETED, auth.getName());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public OrderResponse getOrderById(@PathVariable("id") Long id, Authentication auth) {
-        return orderService.getOrderById(id, auth.getName());
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable("id") Long id, Authentication auth) {
+        OrderResponse order = orderService.getOrderById(id, auth.getName());
+        return ResponseEntity.ok(order);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteOrderById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteOrderById(@PathVariable("id") Long id) {
         orderService.deleteOrderById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Set<OrderResponse> getAllOrders() {
-        return orderService.getAllOrders();
+    public ResponseEntity<Set<OrderResponse>> getAllOrders() {
+        var orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public void cancelOrder(@PathVariable("id") Long id, Authentication auth) {
+    public ResponseEntity<?> cancelOrder(@PathVariable("id") Long id, Authentication auth) {
         orderService.cancelOrder(id, auth.getName());
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.PostMapping;
 public interface InventoryServiceClient {
 
     @PostMapping("api/v1/inventories/order-processing")
-    ResponseEntity<String> substractProductsQuantity(Long orderId);
+    ResponseEntity<?> substractProductsQuantity(Long orderId);
 }

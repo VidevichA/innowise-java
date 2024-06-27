@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.onlineshop.inventoryservice.dto.CreateInventoryRequest;
@@ -33,28 +32,32 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public void createInventory(@Valid @RequestBody CreateInventoryRequest createInventoryRequest) {
-        inventoryService.addNewProductToInventory(createInventoryRequest);
+    public ResponseEntity<InventoryResponse> createInventory(
+            @Valid @RequestBody CreateInventoryRequest createInventoryRequest) {
+        var inventory = inventoryService.addNewProductToInventory(createInventoryRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(inventory);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateInventoryQuantity(@PathVariable("id") Long id, @RequestParam("quantity") Integer quantity) {
+    public ResponseEntity<?> updateInventoryQuantity(@PathVariable("id") Long id,
+            @RequestParam("quantity") Integer quantity) {
         inventoryService.updateInventoryQuantity(id, quantity);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/order-processing")
-    public ResponseEntity<String> substractProductsQuantity(@Valid @RequestBody OrderIdRequest orderId) {
+    public ResponseEntity<?> substractProductsQuantity(@Valid @RequestBody OrderIdRequest orderId) {
         inventoryService.substractProductsQuantity(orderId.getOrderId());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public Set<InventoryResponse> getAllInventories() {
-        return inventoryService.getAllInventories();
+    public ResponseEntity<Set<InventoryResponse>> getAllInventories() {
+        var inventories = inventoryService.getAllInventories();
+        return ResponseEntity.ok(inventories);
     }
 
     @GetMapping("/productIds")
@@ -65,8 +68,8 @@ public class InventoryController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteInventory(@PathVariable("id") Long inventoryId) {
+    public ResponseEntity<?> deleteInventory(@PathVariable("id") Long inventoryId) {
         inventoryService.deleteInventory(inventoryId);
+        return ResponseEntity.noContent().build();
     }
 }

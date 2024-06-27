@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.onlineshop.productservice.dto.ProductRequest;
 import com.onlineshop.productservice.dto.ProductResponse;
@@ -12,13 +14,13 @@ import com.onlineshop.productservice.model.Product;
 import com.onlineshop.productservice.repository.ProductRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductService {
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     public Set<ProductResponse> getAllProducts() {
         List<Product> products = (List<Product>) productRepository.findAll();
@@ -26,11 +28,11 @@ public class ProductService {
     }
 
     public ProductResponse getProductById(Long id) {
-        Product product = productRepository.findById(id).orElse(null);
-        return product == null ? null : convertToResponse(product);
+        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return convertToResponse(product);
     }
 
-    public void createProduct(ProductRequest productDto) {
+    public ProductResponse createProduct(ProductRequest productDto) {
         Product product = Product.builder()
                 .name(productDto.getName())
                 .description(productDto.getDescription())
@@ -38,10 +40,12 @@ public class ProductService {
                 .imageUrl(productDto.getImageUrl())
                 .build();
         productRepository.save(product);
+        return convertToResponse(product);
     }
 
     public void updateProduct(Long id, ProductRequest productDto) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Product with id " + id + " not found"));
         if (productDto.getName() != null) {
             product.setName(productDto.getName());
         }
@@ -58,10 +62,7 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id).orElse(null);
-        if (product != null) {
-            productRepository.delete(product);
-        }
+        productRepository.deleteById(id);
     }
 
     private ProductResponse convertToResponse(Product product) {
